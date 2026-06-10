@@ -180,3 +180,111 @@ As `translateX` moves left or right, the card tilts counter-clockwise or clockwi
 2. **Batching Database Writes**: Queue swipe events in the mobile app and write them to the database in batches of 5-10, instead of sending a request for every single swipe.
 3. **Load Balancing**: Deploy the Express backend inside Docker containers across multiple cloud server nodes behind a load balancer.
 4. **AI Queueing**: Limit the frequency of AI generation requests to manage API rate limits.
+
+---
+
+### Part 6: System Design & Mobile Performance
+
+#### Q31: How do you optimize React Native list rendering performance with FlatList or FlashList?
+**Answer**: FlashList (by Shopify) recycles views instead of destroying and rebuilding them as FlatList does, reducing the garbage collection load and CPU strain. For FlatList:
+1. Provide a unique string key using `keyExtractor`.
+2. Implement `getItemLayout` if item heights are fixed, bypassing dynamic layout calculations.
+3. Keep the render function light and avoid inline function declarations to prevent garbage collection sweeps on scroll.
+
+#### Q32: What is Metro Bundler and what is its role in React Native development?
+**Answer**: Metro is the JavaScript bundler built for React Native. It resolves JavaScript/TypeScript imports, performs hot module replacement (HMR) during development, compiles code into a single index bundle file, and serves assets to the iOS/Android native client wrapper.
+
+#### Q33: How does React Native's new architecture (Fabric and TurboModules) differ from the old bridge architecture?
+**Answer**: The old architecture relies on an asynchronous JSON bridge, which can bottleneck performance during intensive UI actions. The new architecture uses JSI (JavaScript Interface), allowing direct, synchronous C++ invocations between JavaScript and native code. **Fabric** replaces the old shadow tree with a synchronous rendering engine, and **TurboModules** enables lazy loading of native modules to speed up app boot times.
+
+#### Q34: What is Hermes JS Engine, and why does Expo enable it by default?
+**Answer**: Hermes is an open-source JavaScript engine optimized for running React Native. It uses ahead-of-time (AOT) compilation to compile JavaScript into bytecode during the build phase. This reduces memory footprint, speeds up app startup times, and minimizes bundle sizes compared to JIT (Just-In-Time) engines.
+
+#### Q35: How would you configure React Native Gesture Handler inside root views, and why is GestureHandlerRootView required?
+**Answer**: On Android, gestures must be intercepted before they reach native views. Wrapping the app root inside `<GestureHandlerRootView style={{ flex: 1 }}>` ensures that drag, pinch, and rotation handlers are correctly registered and managed by the gesture responder system.
+
+#### Q36: How does virtualized list layout implementation in React Native prevent memory leaks?
+**Answer**: Virtualized lists only render views that are currently visible within the screen viewport (plus a small render buffer). Off-screen views are unmounted and their memory is freed, maintaining a flat memory layout even when scrolling through large data catalogs.
+
+#### Q37: How do you handle deep linking in Expo Router?
+**Answer**: We define a scheme in `app.json` (e.g. `"scheme": "calorai"`) and configure linking paths in Expo Router. Expo Router maps URL patterns directly to files in the `app/` folder (e.g. `calorai://recommendations` routes the user to `app/(tabs)/recommendations.tsx`).
+
+#### Q38: What are Reanimated Worklets, and how do they function under the hood?
+**Answer**: Worklets are small JavaScript functions compiled to run inside a separate JS context on the UI main thread. They allow code to bypass the asynchronous bridge to read and update UI shared values at 60 FPS. They are identified using the `"worklet";` directive.
+
+#### Q39: How do you mock external API calls in Jest for mobile state unit tests?
+**Answer**: We use Jest's spy modules to mock API clients:
+```ts
+jest.mock('axios', () => ({
+  create: jest.fn(() => ({
+    get: jest.fn().mockResolvedValue({ data: [] }),
+    post: jest.fn().mockResolvedValue({ data: { success: true } })
+  }))
+}));
+```
+This intercepts network calls and returns mock data, ensuring tests run reliably in isolation.
+
+#### Q40: What is code splitting, and does React Native support lazy loading of components?
+**Answer**: Code splitting breaks down the JavaScript bundle into smaller chunks that can be loaded on demand. React Native supports lazy loading using `React.lazy()` and `Suspense`, allowing components to load only when they are rendered.
+
+---
+
+### Part 7: Security, DevOps & AI Integrations
+
+#### Q41: Explain Row-Level Security (RLS) in Supabase and how it protects database tables.
+**Answer**: RLS is a PostgreSQL feature that defines security policies at the row level. We can restrict users to only select or update rows where the `user_id` matches their authenticated Firebase UID (`auth.uid() = user_id`), preventing access to other users' data.
+
+#### Q42: How does the Node.js cluster module work, and how does it compare to PM2?
+**Answer**: The cluster module spawns child processes that share port connections, allowing Express to balance traffic across multiple CPU cores. PM2 is a process manager that automates clustering, restarts crashed instances, and manages server resource utilization.
+
+#### Q43: How do you defend against Cross-Site Scripting (XSS) and SQL Injection in an Express Node server?
+**Answer**: 
+* **SQL Injection**: Use parameterized queries or an ORM/Query Builder (like Supabase Client or Prisma) instead of raw string concatenation.
+* **XSS**: Sanitize inputs, enforce CORS policies, and use security headers like `Helmet` to set Content Security Policies (CSP).
+
+#### Q44: What is the benefit of rate limiting, and how would you configure it in an Express gateway?
+**Answer**: Rate limiting protects the server from DDoS attacks and API resource exhaustion. We can configure middleware like `express-rate-limit` to limit the number of requests a single IP can make within a time window (e.g. max 100 requests per 15 minutes).
+
+#### Q45: How do you securely manage environment keys during EAS production builds?
+**Answer**: We avoid committing secrets to version control. Instead, we upload keys to the Expo dashboard under **Secrets** or configure them securely inside our CI/CD runner environments, injecting them during build time.
+
+#### Q46: How does the Gemini SDK handle model contexts, and what does the max token parameter influence?
+**Answer**: Context represents the input history and prompt instructions the model evaluates. The `maxOutputTokens` parameter limits the length of the generated response, helping manage API costs and prevent incomplete cut-offs.
+
+#### Q47: How does database connection pooling improve performance, and how do you handle it in Supabase/PG?
+**Answer**: Establishing database connections is computationally expensive. Connection pooling keeps a pool of active connections open for reuse. Supabase provides built-in pooling using PgBouncer, allowing the backend to handle multiple concurrent requests without overwhelming Postgres.
+
+#### Q48: What is the Git Rebase workflow, and how does it compare to Git Merge?
+**Answer**: `git merge` combines branches by creating a merge commit, preserving the exact history. `git rebase` moves the local commit history to the tip of the target branch, keeping the commit timeline linear and clean.
+
+#### Q49: What are Git Hooks, and how do you set up lint checks before commits (Husky)?
+**Answer**: Git hooks are scripts that run automatically at key points in the git workflow (e.g. `pre-commit`, `pre-push`). We use **Husky** to configure pre-commit hooks that run linting and formatting checks, ensuring clean code commits.
+
+#### Q50: How do you configure Docker Compose to run PostgreSQL locally for testing?
+**Answer**: We define a database service in `docker-compose.yml` using the official Postgres image, configure environment variables for credentials, map ports, and mount volume directories to persist data:
+```yaml
+db:
+  image: postgres:15-alpine
+  ports:
+    - "5432:5432"
+  environment:
+    POSTGRES_DB: calorai
+    POSTGRES_PASSWORD: secret_password
+```
+
+---
+
+## 📅 Two-Day Study Plan - Interview Preparation
+
+This plan is structured to help you confidently explain the entire CalorAI codebase and system design during your interviews.
+
+### 🌅 Day 1: Mobile Client & State Architecture
+* **Morning (9:00 - 12:00)**: Study the Gesture and Animation mechanics. Focus on [CardStack.tsx](file:///Users/apple/Desktop/calorAI/mobile/components/CardStack.tsx) and [FoodCard.tsx](file:///Users/apple/Desktop/calorAI/mobile/components/FoodCard.tsx). Practice explaining how `PanGestureHandler` translates drag events and how `useAnimatedStyle` interpolates card tilt.
+* **Afternoon (13:30 - 17:00)**: Study Zustand Store Management. Review [useFoodStore.ts](file:///Users/apple/Desktop/calorAI/mobile/store/useFoodStore.ts) to understand the swipe list mutations, progress indicators, and the Undo/Redo history stacks.
+* **Evening (18:30 - 21:00)**: Review the API integration layer. Look at [api.ts](file:///Users/apple/Desktop/calorAI/mobile/services/api.ts) to see how Axios hooks catch network failures and fall back to local profiling functions in [ai.ts](file:///Users/apple/Desktop/calorAI/mobile/services/ai.ts).
+
+### 🌌 Day 2: Express Server, Database & AI Prompting
+* **Morning (9:00 - 12:00)**: Study the Backend Server setup. Review [index.ts](file:///Users/apple/Desktop/calorAI/backend/src/index.ts), [auth.middleware.ts](file:///Users/apple/Desktop/calorAI/backend/src/middlewares/auth.middleware.ts), and routes. Practice explaining how JWT tokens are validated and how guest logins are handled.
+* **Afternoon (13:30 - 17:00)**: Study AI Prompts and the Database Schema. Review [gemini.service.ts](file:///Users/apple/Desktop/calorAI/backend/src/services/gemini.service.ts) and [schema.sql](file:///Users/apple/Desktop/calorAI/backend/schema.sql) to understand the SQL table schema and how prompts are structured to ensure valid JSON responses.
+* **Evening (18:30 - 21:00)**: Run mock interviews using the **50 Questions & Answers** in this guide. Practice explaining the system architecture and explaining why we made our specific tech stack choices.
+
