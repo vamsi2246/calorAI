@@ -7,6 +7,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Polyfill WebSocket under Node environments for Supabase Realtime client checks
+if (typeof global.WebSocket === "undefined") {
+  global.WebSocket = require("ws");
+}
+
 const supabaseUrl = process.env.SUPABASE_URL || "https://placeholder-url.supabase.co";
 const supabaseKey = process.env.SUPABASE_KEY || "placeholder-key";
 
@@ -18,3 +23,4 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 export default supabase;
+

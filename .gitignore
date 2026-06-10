@@ -1,0 +1,27 @@
+# Node dependencies
+node_modules/
+package-lock.json
+
+# Compilation outputs
+dist/
+build/
+bin/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Expo directories
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# OS files
+.DS_Store
+Thumbs.db

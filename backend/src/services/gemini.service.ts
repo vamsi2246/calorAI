@@ -2,7 +2,7 @@
 // Gemini AI Service layer for Profiling & Meal Recommendations
 // ====================================================
 
-import { GoogleGenAI } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,24 +12,34 @@ let aiClient: any = null;
 
 if (apiKey) {
   try {
-    // Correct initialization format for GoogleGenAI
-    aiClient = new GoogleGenAI({ apiKey });
+    // Correct initialization format for GoogleGenerativeAI
+    aiClient = new GoogleGenerativeAI(apiKey);
   } catch (error) {
-    console.warn("Failed to initialize GoogleGenAI client:", error);
+    console.warn("Failed to initialize GoogleGenerativeAI client:", error);
   }
 } else {
   console.warn("⚠️ WARNING: GEMINI_API_KEY is not defined. Running AI service in rule-based fallback mode.");
 }
 
+export interface FoodDetails {
+  name: string;
+  category: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
 export interface ProfileInput {
-  liked: Array<{ name: string; category: string; calories: number; protein: number; carbs: number; fat: number }>;
-  disliked: Array<{ name: string; category: string }>;
-  superliked: Array<{ name: string; category: string }>;
-  unsure: Array<{ name: string; category: string }>;
+  liked: FoodDetails[];
+  disliked: FoodDetails[];
+  superliked: FoodDetails[];
+  unsure: FoodDetails[];
 }
 
 export const generateAITasteProfile = async (input: ProfileInput) => {
   const allLiked = [...input.liked, ...input.superliked];
+
   
   if (!aiClient || !apiKey) {
     return generateFallbackProfile(input);
