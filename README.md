@@ -1,181 +1,199 @@
 # CalorAI - AI Food Taste Profiling & Meal Recommendation App
 
-CalorAI is a food taste profiling and meal recommendation mobile application built to redefine nutrition tracking. Using a Tinder-style card interface, users swipe on different food categories to build a detailed taste profile. The Google Gemini API then processes these preferences to output personalized weekly meal plans and healthy alternatives.
-
-```
-                  ┌───────────────────────────────┐
-                  │      CalorAI Mobile App       │
-                  │      (React Native Expo)      │
-                  └──────────────┬────────────────┘
-                                 │
-                   Firebase JWT /│/api/preferences
-                   HTTPS requests│
-                                 ▼
-                  ┌───────────────────────────────┐
-                  │      Express API Server       │
-                  │     (Node.js + TypeScript)    │
-                  └──────────────┬────────┬───────┘
-                                 │        │
-                     Postgres SQL│        │Prompt engineering
-                                 ▼        ▼
-                      ┌─────────────┐  ┌─────────────┐
-                      │  Supabase   │  │ Google AI   │
-                      │  Database   │  │ Gemini API  │
-                      └─────────────┘  └─────────────┘
-```
+CalorAI is a cross-platform mobile application and companion API backend designed to automate food taste profiling and construct personalized AI-driven meal recommendation plans. Built around an intuitive, interactive Tinder-like food swiping interface, it translates simple swipe decisions into comprehensive nutritional architectures.
 
 ---
 
-## 🚀 Key Features
+## 📌 Problem Statement
 
-* **Tinder-like Card Swiper**: Interactive deck utilizing React Native Gesture Handler and Reanimated.
-  * **Swipe Right**: Like
-  * **Swipe Left**: Dislike
-  * **Swipe Up**: Super Like
-  * **Swipe Down**: Unsure
-* **Dynamic Search & Filtering**: Instant keyword searches, cuisine filters (Indian, Italian, Seafood, Keto, etc.), and macros sorting.
-* **Smart Undo / Redo / Reset**: Complete history buffers to retrieve cards swiped by accident.
-* **Offline Fallback Resilience**: Local rule-based AI engine to evaluate profiles on-device if the API server is unreachable.
-* **Weekly Meal Planner**: AI-generated breakfast, lunch, dinner, snacks, healthy alternatives, and cheat meal recommendations.
-* **Premium UI/UX**: Dark theme, glassmorphic sheets, neon gradients, and pulsing skeleton loader pages designed for an Apple Fitness style aesthetic.
-* **Secure Auth**: Firebase anonymous guest sessions and verified OAuth configurations.
+Adhering to nutritional goals (weight loss, muscle gain, clean eating) is notoriously difficult. Existing applications force users to manually track foods, logging every gram of carbohydrate, protein, and fat. This introduces high cognitive friction, leading to user drop-off within the first two weeks. Additionally, traditional apps lack customization; they output generic meal plans that ignore user taste preferences, dietary intolerances, and cultural backgrounds, resulting in unpalatable menu plans that users fail to stick to.
+
+## 💡 Solution
+
+CalorAI solves this track-and-plan fatigue by transforming preference profiling into a game. 
+1. **Frictionless Onboarding**: Users swipe through a visual deck of food cards (right for like, left for dislike, up for superlike, down for unsure) to quickly share their preferences.
+2. **Macronutrient Analysis**: The app silently aggregates the macro densities (protein, fat, carbs) of liked foods behind the scenes.
+3. **AI Taste Profiler**: Using the Google Gemini API, CalorAI compiles these preference patterns into a custom "Taste Profile" representing their lifestyle archetype (e.g. Clean Eater, Protein Focused, Dessert Lover).
+4. **Tailored Meal Plans**: The AI recommendation engine drafts weekly meal plans and healthy swaps that match the user's tastes.
+
+---
+
+## ✨ Features
+
+* **Tinder-like Card Swiper**: High-performance gesture-driven card deck running on native UI threads (60 FPS) with custom quick-action footers.
+* **Interactive Navigation Tools**: Real-time keyword search, cuisine filters, and sorting by calorie/protein metrics.
+* **Swipe State Controls**: Built-in Undo stack, Redo buffers, cached progress saves, and full state resets.
+* **AI Profiler & Recommendation Engine**: Dual-mode engine utilizing Google Gemini API for cloud recommendations and an on-device rule engine fallback for offline resilience.
+* **Visual Statistics**: Beautiful stats displays (likes, dislikes, completions) coupled with progress trackers.
+* **Premium Theme**: Dark-mode visual aesthetic featuring glassmorphism cards, gradients, and pulsing skeleton loaders.
+* **Firebase Authentication**: Anonymous guest sessions and verified token handshakes.
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend
-* **Core**: React Native, Expo, TypeScript, Expo Router
-* **Styling**: NativeWind (Tailwind CSS for Native views)
-* **Animation**: React Native Reanimated (v3), React Native Gesture Handler
-* **State Management**: Zustand
-* **API Requests**: React Query (TanStack Query), Axios
+### Frontend Mobile
+* **Framework**: React Native, Expo (SDK 51), TypeScript
+* **Routing**: Expo Router (file-based navigation)
+* **Gestures & Animations**: React Native Gesture Handler, React Native Reanimated (v3)
+* **State Management**: Zustand (with in-memory queues)
+* **Server Sync**: React Query (TanStack Query), Axios
+* **Styling**: NativeWind (Tailwind CSS integration)
 
-### Backend & Database
-* **Server**: Node.js, Express.js, TypeScript
-* **Database**: Supabase (PostgreSQL)
-* **Authentication**: Firebase Authentication / Admin SDK
-* **Artificial Intelligence**: Google Gemini API (`gemini-1.5-flash`)
+### Backend API
+* **Runtime & Framework**: Node.js, Express.js, TypeScript
+* **Database Interface**: Supabase JS Client (Postgres)
+* **AI Model**: Google Gemini API via `@google/generative-ai` SDK
+* **Auth Verification**: Firebase Admin SDK
 
 ---
 
-## 📁 Repository Structure
+## 🧭 Architecture
+
+```
+                               ┌────────────────────────────────┐
+                               │       CalorAI Mobile App       │
+                               │      (React Native Expo)       │
+                               └──────────────┬─────────────────┘
+                                              │
+                                Firebase JWT /│/api/preferences
+                                HTTPS requests│
+                                              ▼
+                               ┌────────────────────────────────┐
+                               │       Express API Server       │
+                               │     (Node.js + TypeScript)     │
+                               └──────────────┬────────┬────────┘
+                                              │        │
+                                  Postgres SQL│        │Prompt engineering
+                                              ▼        ▼
+                                   ┌─────────────┐  ┌─────────────┐
+                                   │  Supabase   │  │  Google AI  │
+                                   │  Database   │  │ Gemini API  │
+                                   └─────────────┘  └─────────────┘
+```
+
+---
+
+## 📁 Folder Structure
 
 ```
 calor-ai/
 ├── mobile/                  # React Native Mobile App
-│   ├── app/                 # Expo Router Screens & Layouts
-│   ├── assets/              # Mock assets & Icons
-│   ├── components/          # Reusable UI elements (CardStack, GlassView, etc.)
-│   ├── constants/           # Color tokens & 150 items local food database
-│   ├── hooks/               # Custom hooks
-│   ├── services/            # Firebase, Axios client & Local AI fallback
-│   ├── store/               # Zustand global preferences store
+│   ├── app/                 # Expo Router layout & screen routing
+│   │   ├── (auth)/          # welcome.tsx, login.tsx
+│   │   └── (tabs)/          # swipe.tsx, profile.tsx, recommendations.tsx
+│   ├── assets/              # Placeholders & PNG icons
+│   ├── components/          # Reusable UI widgets (CardStack, GlassView, etc.)
+│   ├── constants/           # Color tokens & local static foods database
+│   ├── services/            # Client APIs, Firebase Auth, and local AI logic
+│   ├── store/               # Zustand preference state manager
 │   └── types/               # TypeScript interface templates
 │
 ├── backend/                 # Node + Express Server
 │   ├── src/
-│   │   ├── config/          # Supabase & Gemini Initializers
-│   │   ├── controllers/     # Route logic for foods, swipes & AI
-│   │   ├── middlewares/     # Firebase authentication & error boundaries
-│   │   ├── routes/          # Express route bindings
-│   │   ├── services/        # Gemini API prompt integrations
-│   │   ├── utils/           # Food catalog database
-│   │   └── __tests__/       # API integration tests
-│   ├── schema.sql           # Database schema migration
-│   └── jest.config.js       # Backend testing suite configurations
+│   │   ├── config/          # Client initializers (Supabase, Gemini)
+│   │   ├── controllers/     # Food lists, preferences, and AI endpoints
+│   │   ├── middlewares/     # Firebase verifying & error boundary
+│   │   ├── routes/          # Express routing links
+│   │   ├── services/        # Gemini API prompt formatting
+│   │   ├── utils/           # Centralized foods database catalog
+│   │   └── __tests__/       # Router integration testing modules
+│   ├── schema.sql           # Supabase Database schema migration
+│   └── jest.config.js       # Jest compiler settings
 │
-├── README.md                # Project walkthrough
-└── .env.example             # Global environment templates
+├── README.md                # Main documentation
+└── .env.example             # Global environment configurations
 ```
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚙️ Environment Variables
 
-### Prerequisites
-* Node.js (v18+)
-* Expo Go (on your mobile device or simulator)
+Create a `.env` file in the root workspace, `/mobile` and `/backend` directories:
 
-### 1. Setup Backend
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file based on `.env.example` and add your Google Gemini and Supabase keys:
-   ```bash
-   cp .env.example .env
-   ```
-4. Seed the database schema in Supabase using the script inside [schema.sql](file:///Users/apple/Desktop/calorAI/backend/schema.sql).
-5. Spin up the local development server:
-   ```bash
-   npm run dev
-   ```
+### Root `.env.example`
+```env
+PORT=3000
+SUPABASE_URL=https://your-supabase-project.supabase.co
+SUPABASE_KEY=your_supabase_anon_or_service_role_key
+GEMINI_API_KEY=your_google_gemini_api_key
+FIREBASE_PROJECT_ID=your_firebase_project_id
+BACKEND_URL=http://localhost:3000
+```
 
-### 2. Setup Mobile Frontend
-1. Navigate to the mobile directory:
-   ```bash
-   cd ../mobile
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Setup environmental values:
-   ```bash
-   cp .env.example .env
-   ```
-4. Launch the Expo bundler:
-   ```bash
-   npx expo start
-   ```
-5. Scan the QR code with your Expo Go app (Android) or Camera app (iOS) to load the application.
+### Mobile `.env.example`
+```env
+EXPO_PUBLIC_BACKEND_URL=http://localhost:3000/api
+EXPO_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain_url
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+EXPO_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
+```
+
+### Backend `.env.example`
+```env
+PORT=3000
+SUPABASE_URL=https://your-supabase-project.supabase.co
+SUPABASE_KEY=your_supabase_service_role_key
+GEMINI_API_KEY=your_google_gemini_api_key
+FIREBASE_PROJECT_ID=your_firebase_project_id
+```
 
 ---
 
-## 🧪 Running Tests
+## 💻 Local Setup & Installation
 
-### Backend Route Tests
-Runs Supertest integration suites targeting Express controllers:
+### Prerequisite Checklist
+* Install [Node.js](https://nodejs.org/) (version 18+ recommended)
+* Install [Expo Go](https://expo.dev/client) on your iOS/Android test device
+
+### Step 1: Install Dependencies
+```bash
+# Install backend packages
+cd backend
+npm install
+
+# Install mobile packages
+cd ../mobile
+npm install
+```
+
+### Step 2: Database Provisioning
+Run the SQL queries inside [schema.sql](file:///Users/apple/Desktop/calorAI/backend/schema.sql) in your Supabase project's SQL Editor to instantiate the Postgres tables and indexes.
+
+### Step 3: Run Backend API Server
 ```bash
 cd backend
-npm run test
+npm run dev
 ```
+The Express server starts listening at `http://localhost:3000`.
 
-### Frontend State Tests
-Runs Jest tests verifying Zustand swiping stacks and metrics updates:
+### Step 4: Run Mobile Frontend App
 ```bash
 cd mobile
-npm run test
+npx expo start
 ```
+Use the Expo QR code printed in the terminal to load the application inside the Expo Go app.
 
 ---
 
-## 📈 API Documentation Summary
+## 📡 API Documentation & AI Integration
 
-The backend exposes the following REST endpoints under the prefix `/api`:
+The Express backend exposes REST routes under `/api` for logging preferences and managing profiles. For detailed schema examples and parameter values, refer to [API_DOCUMENTATION.md](file:///Users/apple/Desktop/calorAI/API_DOCUMENTATION.md).
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| `GET` | `/foods` | Queries the food catalog (supports `q`, `category`, `sort`) | No |
-| `POST` | `/preferences` | Logs a card swipe event (like, dislike, superlike, unsure) | Yes |
-| `POST` | `/generate-profile` | Evaluates swipes and returns Gemini Taste Profile + Meal Plan | Yes |
-| `GET` | `/profile` | Fetches the user's cached taste profile | Yes |
-| `GET` | `/recommendations` | Fetches the user's cached AI recommendations | Yes |
+### AI Integration Flow
+1. **Swipe Data Capture**: The app collects swipe history array indicators.
+2. **Gemini Prompt Parsing**: The server formats these swipes and prompt instructions, sending them to the `gemini-1.5-flash` model.
+3. **Structured Outputs**: Gemini returns structured raw JSON matching our nutritional typing configurations.
 
 ---
 
-## 🔮 Future Roadmaps
+## 🚀 Deployment
 
-1. **Camera Meal Scanner**: Integrate Gemini Vision API to parse meals from camera captures directly.
-2. **Apple Health & Google Fit Connect**: Sync swiped protein/calorie averages directly to health kits.
-3. **Multi-User Swiping (Date Night for Food)**: Swipe together with a friend/partner and generate a shared restaurant recommendation list where tastes intersect.
+Complete multi-platform production builds and environment deployment guidelines are detailed in [DEPLOYMENT.md](file:///Users/apple/Desktop/calorAI/DEPLOYMENT.md).
 
 ---
 
-## 📜 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 🔮 Future Improvements
+
+Refer to [FUTURE_IMPROVEMENTS.md](file:///Users/apple/Desktop/calorAI/FUTURE_IMPROVEMENTS.md) for details on planned features, including Apple Health synchronizations, computer vision food camera parsing, and shared double-swiping matching.
